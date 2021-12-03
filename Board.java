@@ -20,13 +20,13 @@ public class Board {
 
     //get board
     public int[][] getBoard() {
-        return board;
+        return this.board;
     }
     public int[]getColumnStop(){
-        return columnStop;
+        return this.columnStop;
     }
     public int[]getRowStop(){
-        return rowStop;
+        return this.rowStop;
     }
 
 
@@ -44,7 +44,7 @@ public class Board {
     }
 
     //判断某位置是否是空的
-    public boolean boardVoid(int columnIndex, int rowIndex) {
+    public boolean isBoardVoid(int columnIndex, int rowIndex) {
         if (board[columnIndex][rowIndex] == 0) {
             return true;
         } else {
@@ -53,7 +53,7 @@ public class Board {
     }
 
     //判断某位置是黑子还是白子（该位置坐标）
-    public boolean boardBlack(int columnIndex, int rowIndex) {
+    public boolean isBoardBlack(int columnIndex, int rowIndex) {
         if (board[columnIndex][rowIndex] == -1) {
             return true;
         } else {
@@ -71,7 +71,7 @@ public class Board {
 
     //判断是否和你相同(你的颜色，判断点的坐标）
     public boolean sameChess(int figure, int columnIndex, int rowIndex) {
-        if ((figure == -1 && boardBlack(columnIndex, rowIndex)) || (figure == 1 && boardWhite(columnIndex, rowIndex))) {
+        if ((figure == -1 && isBoardBlack(columnIndex, rowIndex)) || (figure == 1 && boardWhite(columnIndex, rowIndex))) {
             return true;
         } else {
             return false;
@@ -80,7 +80,7 @@ public class Board {
 
     //判断是否和你相反（你的颜色，判断点的坐标）
     public boolean diffChess(int figure, int columnIndex, int rowIndex) {
-        if ((figure == 1 && boardBlack(columnIndex, rowIndex)) || (figure == -1 && boardWhite(columnIndex, rowIndex))) {
+        if ((figure == 1 && isBoardBlack(columnIndex, rowIndex)) || (figure == -1 && boardWhite(columnIndex, rowIndex))) {
             return true;
         } else {
             return false;
@@ -99,7 +99,7 @@ public class Board {
             } else if (sameChess(figure, columnIndex, i)) {
                rowStop[0]=i;
                 return true;
-            } else if (boardVoid(columnIndex, i)) {
+            } else if (isBoardVoid(columnIndex, i)) {
                 return false;
             }
         }
@@ -116,7 +116,7 @@ public class Board {
             } else if (sameChess(figure, columnIndex, i)) {
                 rowStop[1]=i;
                 return true;
-            } else if (boardVoid(columnIndex, i)) {
+            } else if (isBoardVoid(columnIndex, i)) {
                 return false;
             }
         }
@@ -133,7 +133,7 @@ public class Board {
             } else if (sameChess(figure, i, rowIndex)) {
                 columnStop[2]=i;
                 return true;
-            } else if (boardVoid(i, rowIndex)) {
+            } else if (isBoardVoid(i, rowIndex)) {
                 return false;
             }
         }
@@ -150,7 +150,7 @@ public class Board {
             } else if (sameChess(figure, i, rowIndex)) {
                 columnStop[3]=i;
                 return true;
-            } else if (boardVoid(i, rowIndex)) {
+            } else if (isBoardVoid(i, rowIndex)) {
                 return false;
             }
         }
@@ -175,7 +175,7 @@ public class Board {
                 columnStop[4]=m;
                 rowStop[4]=n;
                 return true;
-            } else if (boardVoid(m, n)) {
+            } else if (isBoardVoid(m, n)) {
                 return false;
             }
         }
@@ -200,7 +200,7 @@ public class Board {
                 columnStop[5]=m;
                 rowStop[5]=n;
                 return true;
-            } else if (boardVoid(m, n)) {
+            } else if (isBoardVoid(m, n)) {
                 return false;
             }
         }
@@ -225,7 +225,7 @@ public class Board {
                 columnStop[6]=m;
                 rowStop[6]=n;
                 return true;
-            } else if (boardVoid(m, n)) {
+            } else if (isBoardVoid(m, n)) {
                 return false;
             }
         }
@@ -250,7 +250,7 @@ public class Board {
                 columnStop[7]=m;
                 rowStop[7]=n;
                 return true;
-            } else if (boardVoid(m, n)) {
+            } else if (isBoardVoid(m, n)) {
                 return false;
             }
         }
