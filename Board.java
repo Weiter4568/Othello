@@ -1,21 +1,21 @@
 package initialization;
 
 public class Board {
-    private int[][] board = new int[8][8];
-    private int[]columnStop=new int[8];//up down left right ul ud ru rd
+    private int[][] board = new int[8][8];//up down left right ul ud ru rd
     private int[]rowStop=new int [8];
+    private int[]columnStop=new int[8];
 
     //创建一个步数类型的数据
 
 
     //构造器不知道要写啥
-    public Board(int[][] board) {
-        for (int m = 0; m < 8; m++) {
-            for (int n = 0; n < 8; n++) {
-                this.board[m][n] = board[m][n];
-            }
-        }
-    }
+    //public Board(int[][] board) {
+      //  for (int m = 0; m < 8; m++) {
+        //    for (int n = 0; n < 8; n++) {
+          //      this.board[m][n] = board[m][n];
+            //}
+        //}
+    //}
 
 
     //get board
@@ -31,7 +31,7 @@ public class Board {
 
 
     //清空加初始化棋盘
-    public void setBoard() {
+    public void cleanBoard() {
         for (int m = 0; m < 8; m++) {
             for (int n = 0; n < 8; n++) {
                 board[m][n] = 0;
@@ -44,8 +44,8 @@ public class Board {
     }
 
     //判断某位置是否是空的
-    public boolean isBoardVoid(int columnIndex, int rowIndex) {
-        if (board[columnIndex][rowIndex] == 0) {
+    public boolean isBoardVoid(int rowIndex, int columnIndex) {
+        if (board[rowIndex][columnIndex] == 0) {
             return true;
         } else {
             return false;
@@ -53,16 +53,16 @@ public class Board {
     }
 
     //判断某位置是黑子还是白子（该位置坐标）
-    public boolean isBoardBlack(int columnIndex, int rowIndex) {
-        if (board[columnIndex][rowIndex] == -1) {
+    public boolean isBoardBlack(int rowIndex, int columnIndex) {
+        if (board[rowIndex][columnIndex] == -1) {
             return true;
         } else {
             return false;
         }
     }
 
-    public boolean boardWhite(int columnIndex, int rowIndex) {
-        if (board[columnIndex][rowIndex] == 1) {
+    public boolean isBoardWhite(int rowIndex, int columnIndex) {
+        if (board[rowIndex][columnIndex] == 1) {
             return true;
         } else {
             return false;
@@ -70,8 +70,8 @@ public class Board {
     }
 
     //判断是否和你相同(你的颜色，判断点的坐标）
-    public boolean sameChess(int figure, int columnIndex, int rowIndex) {
-        if ((figure == -1 && isBoardBlack(columnIndex, rowIndex)) || (figure == 1 && boardWhite(columnIndex, rowIndex))) {
+    public boolean sameChess(int figure, int rowIndex, int columnIndex) {
+        if ((figure == -1 && isBoardBlack(rowIndex, columnIndex)) || (figure == 1 && isBoardWhite(rowIndex, columnIndex))) {
             return true;
         } else {
             return false;
@@ -79,8 +79,8 @@ public class Board {
     }
 
     //判断是否和你相反（你的颜色，判断点的坐标）
-    public boolean diffChess(int figure, int columnIndex, int rowIndex) {
-        if ((figure == 1 && isBoardBlack(columnIndex, rowIndex)) || (figure == -1 && boardWhite(columnIndex, rowIndex))) {
+    public boolean diffChess(int figure, int rowIndex, int columnIndex) {
+        if ((figure == 1 && isBoardBlack(rowIndex, columnIndex)) || (figure == -1 && isBoardWhite(rowIndex, columnIndex))) {
             return true;
         } else {
             return false;
@@ -88,78 +88,78 @@ public class Board {
     }
 
     //检索某位置向上有无同颜色的子还顺便把相同的子存起来，
-    public boolean checkUpLocation(int figure, int columnIndex, int rowIndex) {//你想下的位置
+    public boolean checkUpLocation(int figure, int rowIndex, int columnIndex) {//你想下的位置
         int a = 0;
         if (rowIndex >= 2) a++;//判断是否为边界点,必须至少在第三行
-        if (diffChess(figure, columnIndex, rowIndex - 1)) a++;//判断该子上方一个是否有对手子
+        if (diffChess(figure, rowIndex - 1, columnIndex)) a++;//判断该子上方一个是否有对手子
         for (int x = 2; rowIndex - x >= 0; x++) {
             int i = rowIndex - x;
             if (a != 2) {
                 return false;
-            } else if (sameChess(figure, columnIndex, i)) {
+            } else if (sameChess(figure, i,columnIndex)) {
                rowStop[0]=i;
                 return true;
-            } else if (isBoardVoid(columnIndex, i)) {
+            } else if (isBoardVoid( i,columnIndex)) {
                 return false;
             }
         }
         return false;
     }
-    public boolean checkDoLocation(int figure, int columnIndex, int rowIndex) {//你想下的位置
+    public boolean checkDoLocation(int figure, int rowIndex, int columnIndex) {//你想下的位置
         int a = 0;
         if (rowIndex <= 5) a++;//判断是否为边界点,必须至少在第三行
-        if (diffChess(figure, columnIndex, rowIndex + 1)) a++;//判断该子下方一个是否有对手子
+        if (diffChess(figure, rowIndex + 1, columnIndex)) a++;//判断该子下方一个是否有对手子
         for (int x = 2; rowIndex + x <= 7; x++) {
             int i = rowIndex + x;
             if (a != 2) {
                 return false;
-            } else if (sameChess(figure, columnIndex, i)) {
+            } else if (sameChess(figure, i, columnIndex)) {
                 rowStop[1]=i;
                 return true;
-            } else if (isBoardVoid(columnIndex, i)) {
+            } else if (isBoardVoid( i,columnIndex)) {
                 return false;
             }
         }
         return false;
     }
-    public boolean checkLeLocation(int figure, int columnIndex, int rowIndex) {//你想下的位置
+    public boolean checkLeLocation(int figure, int rowIndex, int columnIndex) {//你想下的位置
         int a = 0;
         if (columnIndex >= 2) a++;//判断是否为边界点,必须至少在第六行
-        if (diffChess(figure, columnIndex - 1, rowIndex)) a++;//判断该子右方一个是否有对手子
+        if (diffChess(figure, rowIndex, columnIndex - 1)) a++;//判断该子右方一个是否有对手子
         for (int x = 2; columnIndex + x >= 0; x++) {
             int i = columnIndex - x;
             if (a != 2) {
                 return false;
-            } else if (sameChess(figure, i, rowIndex)) {
+            } else if (sameChess(figure,  rowIndex,i)) {
                 columnStop[2]=i;
                 return true;
-            } else if (isBoardVoid(i, rowIndex)) {
+            } else if (isBoardVoid(rowIndex,i )) {
                 return false;
             }
         }
         return false;
     }
-    public boolean checkRiLocation(int figure, int columnIndex, int rowIndex) {//你想下的位置
+    public boolean checkRiLocation(int figure, int rowIndex, int columnIndex) {//你想下的位置
         int a = 0;
         if (columnIndex <= 5) a++;//判断是否为边界点,必须至少在第六行
-        if (diffChess(figure, columnIndex + 1, rowIndex)) a++;//判断该子右方一个是否有对手子
+        if (diffChess(figure, rowIndex, columnIndex + 1)) a++;//判断该子右方一个是否有对手子
         for (int x = 2; columnIndex + x <= 7; x++) {
             int i = columnIndex + x;
             if (a != 2) {
                 return false;
-            } else if (sameChess(figure, i, rowIndex)) {
+            } else if (sameChess(figure, rowIndex,i )) {
                 columnStop[3]=i;
                 return true;
-            } else if (isBoardVoid(i, rowIndex)) {
+            } else if (isBoardVoid(rowIndex,i )) {
                 return false;
             }
         }
         return false;
     }
-    public boolean checkLULocation(int figure, int columnIndex, int rowIndex) {//左上
+    public boolean checkLULocation(int figure, int rowIndex, int columnIndex) {//左上
        int a = 0;
         if (rowIndex >= 2 && columnIndex >= 2) a++;//判断是否为边界点,必须至少在第三行
-        if (diffChess(figure, columnIndex - 1, rowIndex - 1)) a++;//判断该子上方一个是否有对手子
+        if (diffChess(figure, rowIndex - 1, columnIndex - 1)) a++;//判断该子上方一个是否有对手子
         int haha;
         if (rowIndex <= columnIndex) {
              haha = rowIndex;
@@ -167,8 +167,8 @@ public class Board {
              haha = columnIndex;
         }
         for (int x = 2; haha - x >= 0; x++) {
-            int m = columnIndex - x;
-            int n = rowIndex - x;
+            int m = rowIndex - x;
+            int n = columnIndex - x;
             if (a != 2) {
                 return false;
             } else if (sameChess(figure, m, n)) {
@@ -181,10 +181,10 @@ public class Board {
         }
         return false;
     }
-    public boolean checkLDLocation(int figure, int columnIndex, int rowIndex) {//左下
+    public boolean checkLDLocation(int figure, int rowIndex, int columnIndex) {//左下
         int a = 0;
         if (rowIndex <=5 && columnIndex >= 2) a++;//判断是否为边界点,必须至少在第三行
-        if (diffChess(figure, columnIndex - 1, rowIndex + 1)) a++;//判断该子上方一个是否有对手子
+        if (diffChess(figure, rowIndex + 1, columnIndex - 1)) a++;//判断该子上方一个是否有对手子
         int haha;
         if (7-rowIndex <= columnIndex) {
             haha = 7-rowIndex;
@@ -192,8 +192,8 @@ public class Board {
             haha = columnIndex;
         }
         for (int x = 2; haha - x >= 0; x++) {
-            int m = columnIndex - x;
-            int n = rowIndex + x;
+            int n = columnIndex - x;
+            int m = rowIndex + x;
             if (a != 2) {
                 return false;
             } else if (sameChess(figure, m, n)) {
@@ -206,10 +206,10 @@ public class Board {
         }
         return false;
     }
-    public boolean checkRULocation(int figure, int columnIndex, int rowIndex) {//左下
+    public boolean checkRULocation(int figure, int rowIndex, int columnIndex) {//左下
         int a = 0;
         if (rowIndex >=2 && columnIndex <=5) a++;//判断是否为边界点,必须至少在第三行
-        if (diffChess(figure, columnIndex + 1, rowIndex - 1)) a++;//判断该子上方一个是否有对手子
+        if (diffChess(figure, rowIndex - 1, columnIndex + 1)) a++;//判断该子上方一个是否有对手子
         int haha;
         if (rowIndex <= 7-columnIndex) {
             haha = rowIndex;
@@ -217,8 +217,8 @@ public class Board {
             haha = 7-columnIndex;
         }
         for (int x = 2; haha - x >= 0; x++) {
-            int m = columnIndex + x;
-            int n = rowIndex - x;
+            int n = columnIndex + x;
+            int m = rowIndex - x;
             if (a != 2) {
                 return false;
             } else if (sameChess(figure, m, n)) {
@@ -231,10 +231,10 @@ public class Board {
         }
         return false;
     }
-    public boolean checkRDLocation(int figure, int columnIndex, int rowIndex) {//左下
+    public boolean checkRDLocation(int figure, int rowIndex, int columnIndex) {//左下
         int a = 0;
         if (rowIndex <=5 && columnIndex <= 5) a++;//判断是否为边界点,必须至少在第三行
-        if (diffChess(figure, columnIndex + 1, rowIndex + 1)) a++;//判断该子上方一个是否有对手子
+        if (diffChess(figure, rowIndex + 1, columnIndex + 1)) a++;//判断该子上方一个是否有对手子
         int haha;
         if (7-rowIndex <= 7-columnIndex) {
             haha = 7-rowIndex;
@@ -242,8 +242,8 @@ public class Board {
             haha =7- columnIndex;
         }
         for (int x = 2; haha - x >= 0; x++) {
-            int m = columnIndex + x;
-            int n = rowIndex + x;
+            int n = columnIndex + x;
+            int m = rowIndex + x;
             if (a != 2) {
                 return false;
             } else if (sameChess(figure, m, n)) {
@@ -256,60 +256,62 @@ public class Board {
         }
         return false;
     }
-    public boolean checkLocation(int figure,int columnIndex,int rowIndex){//结合八个方向能不能下,只要有一个能下就下
-        if(checkUpLocation(figure,columnIndex,rowIndex)||checkDoLocation(figure,columnIndex,rowIndex)||checkLeLocation(figure,columnIndex,rowIndex)||checkRiLocation(figure,columnIndex,rowIndex)||checkLULocation(figure,columnIndex,rowIndex)||checkLDLocation(figure,columnIndex,rowIndex)||checkRULocation(figure,columnIndex,rowIndex)||checkRDLocation(figure,columnIndex,rowIndex)){
+    //八个方向的汇总
+    public boolean checkLocation(int figure,int rowIndex,int columnIndex){//结合八个方向能不能下,只要有一个能下就下
+        if(checkUpLocation(figure,rowIndex,columnIndex)||checkDoLocation(figure,rowIndex,columnIndex)||checkLeLocation(figure,rowIndex,columnIndex)||checkRiLocation(figure,rowIndex,columnIndex)||checkLULocation(figure,rowIndex,columnIndex)||checkLDLocation(figure,rowIndex,columnIndex)||checkRULocation(figure,rowIndex,columnIndex)||checkRDLocation(figure,rowIndex,columnIndex)){
             return true;
         }else {
             return false;
         }
     }
-    public void changeBoard(int figure,int columnIndex,int rowIndex){
-        if(checkUpLocation(figure,columnIndex,rowIndex)){
+   //某人走某位置会怎么改变棋盘
+    public void changeBoard(int figure,int rowIndex,int columnIndex){
+        if(checkUpLocation(figure,rowIndex,columnIndex)){
             for(int i=rowIndex;i>=rowStop[0];i--){
-                board[columnIndex][i]=figure;
+                board[i][columnIndex]=figure;
             }
         }
-        if(checkDoLocation(figure,columnIndex,rowIndex)){
+        if(checkDoLocation(figure,rowIndex,columnIndex)){
             for(int i=rowIndex;i<=rowStop[1];i++){
-                board[columnIndex][i]=figure;
+                board[i][columnIndex]=figure;
             }
         }
-        if(checkLeLocation(figure,columnIndex,rowIndex)){
+        if(checkLeLocation(figure,rowIndex,columnIndex)){
             for(int i=columnIndex;i>=columnStop[2];i--){
-                board[i][rowIndex]=figure;
+                board[rowIndex][i]=figure;
             }
         }
-        if(checkRiLocation(figure,columnIndex,rowIndex)){
+        if(checkRiLocation(figure,rowIndex,columnIndex)){
             for(int i=columnIndex;i<=columnStop[3];i++){
-            board[i][rowIndex]=figure;
+            board[rowIndex][i]=figure;
             }
         }
-        if(checkLULocation(figure,columnIndex,rowIndex)){
-            for(int m=columnIndex;m>=columnStop[4];m--){
-               int n=rowIndex;
+        if(checkLULocation(figure,rowIndex,columnIndex)){
+            for(int n=columnIndex;n>=columnStop[4];n--){
+               int m=rowIndex;
                board[m][n]=figure;
-               n--;
+               m--;
             }
         }
-        if(checkLDLocation(figure,columnIndex,rowIndex)){
-            for(int m=columnIndex;m>=columnStop[5];m--){
-                int n=rowIndex;
+        if(checkLDLocation(figure,rowIndex,columnIndex)){
+            for(int n=columnIndex;n>=columnStop[5];n--){
+                int m=rowIndex;
                 board[m][n]=figure;
-                n++;
+                m++;
             }
         }
-        if(checkRULocation(figure,columnIndex,rowIndex)){
-            for(int m=columnIndex;m<=columnStop[6];m++){
-                int n=rowIndex;
+        if(checkRULocation(figure,rowIndex,columnIndex)){
+            for(int n=columnIndex;n<=columnStop[6];n++){
+                int m=rowIndex;
                 board[m][n]=figure;
-                n--;
+                m--;
             }
         }
-        if(checkRDLocation(figure,columnIndex,rowIndex)){
-            for(int m=columnIndex;m<=columnStop[7];m++){
-                int n=rowIndex;
+        if(checkRDLocation(figure,rowIndex,columnIndex)){
+            for(int n=columnIndex;n<=columnStop[7];n++){
+                int m=rowIndex;
                 board[m][n]=figure;
-                n++;
+                m++;
             }
         }
     }
