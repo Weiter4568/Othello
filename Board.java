@@ -206,7 +206,7 @@ public class Board {
         }
         return false;
     }
-    public boolean checkRULocation(int figure, int rowIndex, int columnIndex) {//左下
+    public boolean checkRULocation(int figure, int rowIndex, int columnIndex) {//右上
         int a = 0;
         if (rowIndex >=2 && columnIndex <=5) a++;//判断是否为边界点,必须至少在第三行
         if (diffChess(figure, rowIndex - 1, columnIndex + 1)) a++;//判断该子上方一个是否有对手子
@@ -231,7 +231,7 @@ public class Board {
         }
         return false;
     }
-    public boolean checkRDLocation(int figure, int rowIndex, int columnIndex) {//左下
+    public boolean checkRDLocation(int figure, int rowIndex, int columnIndex) {//右下
         int a = 0;
         if (rowIndex <=5 && columnIndex <= 5) a++;//判断是否为边界点,必须至少在第三行
         if (diffChess(figure, rowIndex + 1, columnIndex + 1)) a++;//判断该子上方一个是否有对手子
