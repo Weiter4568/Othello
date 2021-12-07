@@ -7,8 +7,11 @@ public class Player {
     private static int playerCnt = 1;
 
     //构造器写什么，一个玩家还是两个玩家
+    /* 构造器写一个玩家就好了吧 */
     //怎么输入黑手还是白手
+    /* 我觉得可以用playCnt来判断，因为是黑棋先手，所以当playCnt为奇数的时候应该就是黑棋输入姓名 */
     //setName的意义是什么
+    /* 就是在A4 里面可以改名这个操作，project里可以没有 */
     public Player(String name,int figure,int pid) {
         //第一个玩家信息
         this.pid = playerCnt;
