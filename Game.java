@@ -8,16 +8,20 @@ public class Game {
     private Player whitePlayer;
     private Player blackPlayer;
     private ArrayList<Step> stepList = new ArrayList<>();
-    private int[][] board = new int[8][8];
+    private int[][] board =new int[8][8];
     //新加的
     private int whiteCnt;
     private int blackCnt;
     private static int blackFigure = -1;//代表黑手
     private static int whiteFigure = 1;//代表白手
     private int currentFigure = -1;//代表当前是黑手还是白手，黑手先下
-    private int[] rowStop = new int[8];//
-    private int[] columnStop = new int[8];//
-    private boolean[][] canPut = new boolean[8][8];
+    private int[] rowStop = new int[8];//每步完需要初始化
+    private int[] columnStop = new int[8];//每步完需要初始化
+    private boolean[][] canPut = new boolean[8][8];//每步完需要初始化
+    private ArrayList canPutList=new ArrayList();
+    private ArrayList rowStopList=new ArrayList();
+    private ArrayList columnList=new ArrayList();
+    private ArrayList boardList=new ArrayList();
     private int endMark = 0;
 
     public Game(String name, Player whitePlayer, Player blackPlayer) {
@@ -26,7 +30,7 @@ public class Game {
         gameCnt++;
         this.blackPlayer = blackPlayer;
         this.whitePlayer = whitePlayer;
-        setBoard(board = new int[8][8]);//???可以嘛
+        setBoard(board = new int[8][8]);
 
 
     }
@@ -60,6 +64,22 @@ public class Game {
     public ArrayList<Step> getStepList() {
         return stepList;
     }//get步数数列
+
+    public ArrayList getCanPutList() {
+        return canPutList;
+    }
+
+    public ArrayList getColumnList() {
+        return columnList;
+    }
+
+    public ArrayList getRowStopList() {
+        return rowStopList;
+    }
+
+    public ArrayList getBoardList() {
+        return boardList;
+    }
 
     public int[][] getBoard() {
         return this.board;
@@ -426,6 +446,12 @@ public class Game {
     //放置棋子
     public void putChess(int figure, int rowIndex, int columnIndex) {
         changeBoard(figure, rowIndex, columnIndex);//更新棋盘
+        Step step=new Step(figure,rowIndex,columnIndex);
+        stepList.add(step.getSid(),step);//存进去下的这一步
+        canPutList.add(step.getSid(),canPut);
+        rowStopList.add(step.getSid(),rowStop);
+        columnList.add(step.getSid(),columnStop);
+        boardList.add(step.getSid(),board);
         //重新初始化canPut数组
         for (int m = 0; m < 8; m++) {
             for (int n = 0; n < 8; n++) {
@@ -433,7 +459,6 @@ public class Game {
             }
         }
     }
-
     //关于有无可以落子及之后怎么办
     public void howDo(int figure, int rowIndex, int columnIndex) {
         if (checkPut(figure) && canPut[rowIndex][columnIndex]) {
@@ -455,6 +480,19 @@ public class Game {
         } else {
             return whitePlayer;
         }
+    }
+    public int getWinnerPid(){
+        if( blackPlayer==checkWinner(blackCnt,whiteCnt)){
+            return blackPlayer.getPid();
+        }else{
+            return whitePlayer.getPid();
+        }
+    }
+    //悔棋
+    public void repentanceChess(){
+        boardList.remove(boardList.size()-1);
+        stepList.remove(stepList.size()-1);
+        canPutList.remove(canPutList.size()-1);
     }
 
 
