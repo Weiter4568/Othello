@@ -1,5 +1,10 @@
 package initialization;
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 public class Game {
     private int gid;
@@ -494,10 +499,34 @@ public class Game {
         stepList.remove(stepList.size()-1);
         canPutList.remove(canPutList.size()-1);
     }
+    //将棋盘数字化
+    public StringBuilder putBoard(){
+        StringBuilder PutBoard=new StringBuilder();
+        int current;
+        for(int m=0;m<8;m++){
+            for(int n=0;n<8;n++){
+               current=board[m][n];
+               PutBoard.append(current+"\n");
+            }
+        }
+        return PutBoard;
+    }
+    //存的格式
+    public String toString() {
+        return String.format(name+"\n"+gid+"\n" +blackPlayer.toString()+"\n"+blackCnt+"\n"+
+                whitePlayer.toString()+"\n"+whiteCnt+"\n"+ putBoard());
 
+    }
+    public void saveFile()throws Exception{
+        String fileName="D:\\黑白棋数据\\";
+        String fileName2 = "newFile"+getGid()+".txt";
+        fileName = fileName + fileName2;
+        Game game=new Game(name,whitePlayer,blackPlayer);
+        Files.write(Paths.get(fileName),game.toString().getBytes(StandardCharsets.UTF_8)) ;
+    }
+    public void upload (int gid) {
+        String fileName="D:\\黑白棋数据\\"+"newFile"+gid+".txt";
 
-
-
-
+    }
 
 }

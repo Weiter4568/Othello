@@ -41,7 +41,7 @@ public class Player {
 
 
     public String toString() {
-        return String.format("Player: %s, pid: %d",name,pid);
+        return String.format(name+"\n"+pid);
 
     }
 }
