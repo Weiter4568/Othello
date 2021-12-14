@@ -1,5 +1,8 @@
 package initialization;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -13,7 +16,7 @@ public class Game {
     private Player whitePlayer;
     private Player blackPlayer;
     private ArrayList<Step> stepList = new ArrayList<>();
-    private int[][] board =new int[8][8];
+    private int[][] board = new int[8][8];
     //新加的
     private int whiteCnt;
     private int blackCnt;
@@ -23,10 +26,10 @@ public class Game {
     private int[] rowStop = new int[8];//每步完需要初始化
     private int[] columnStop = new int[8];//每步完需要初始化
     private boolean[][] canPut = new boolean[8][8];//每步完需要初始化
-    private ArrayList canPutList=new ArrayList();
-    private ArrayList rowStopList=new ArrayList();
-    private ArrayList columnList=new ArrayList();
-    private ArrayList boardList=new ArrayList();
+    private ArrayList <boolean >canPutList = new ArrayList();
+    private ArrayList rowStopList = new ArrayList();
+    private ArrayList columnList = new ArrayList();
+    private ArrayList boardList = new ArrayList();
     private int endMark = 0;
 
     public Game(String name, Player whitePlayer, Player blackPlayer) {
@@ -451,12 +454,12 @@ public class Game {
     //放置棋子
     public void putChess(int figure, int rowIndex, int columnIndex) {
         changeBoard(figure, rowIndex, columnIndex);//更新棋盘
-        Step step=new Step(figure,rowIndex,columnIndex);
-        stepList.add(step.getSid(),step);//存进去下的这一步
-        canPutList.add(step.getSid(),canPut);
-        rowStopList.add(step.getSid(),rowStop);
-        columnList.add(step.getSid(),columnStop);
-        boardList.add(step.getSid(),board);
+        Step step = new Step(figure, rowIndex, columnIndex);
+        stepList.add(step.getSid(), step);//存进去下的这一步
+        canPutList.add(canPut);
+        rowStopList.add(step.getSid(), rowStop);
+        columnList.add(step.getSid(), columnStop);
+        boardList.add(step.getSid(), board);
         //重新初始化canPut数组
         for (int m = 0; m < 8; m++) {
             for (int n = 0; n < 8; n++) {
@@ -464,6 +467,7 @@ public class Game {
             }
         }
     }
+
     //关于有无可以落子及之后怎么办
     public void howDo(int figure, int rowIndex, int columnIndex) {
         if (checkPut(figure) && canPut[rowIndex][columnIndex]) {
@@ -486,47 +490,71 @@ public class Game {
             return whitePlayer;
         }
     }
-    public int getWinnerPid(){
-        if( blackPlayer==checkWinner(blackCnt,whiteCnt)){
+
+    public int getWinnerPid() {
+        if (blackPlayer == checkWinner(blackCnt, whiteCnt)) {
             return blackPlayer.getPid();
-        }else{
+        } else {
             return whitePlayer.getPid();
         }
     }
+
     //悔棋
-    public void repentanceChess(){
-        boardList.remove(boardList.size()-1);
-        stepList.remove(stepList.size()-1);
-        canPutList.remove(canPutList.size()-1);
+    public void repentanceChess() {
+        boardList.remove(boardList.size() - 1);
+        stepList.remove(stepList.size() - 1);
+        canPutList.remove(canPutList.size() - 1);
     }
+
     //将棋盘数字化
-    public StringBuilder putBoard(){
-        StringBuilder PutBoard=new StringBuilder();
+    public StringBuilder putBoard() {
+        StringBuilder PutBoard = new StringBuilder();
         int current;
-        for(int m=0;m<8;m++){
-            for(int n=0;n<8;n++){
-               current=board[m][n];
-               PutBoard.append(current+"\n");
+        for (int m = 0; m < 8; m++) {
+            for (int n = 0; n < 8; n++) {
+                current = board[m][n];
+                PutBoard.append(current + "\n");
             }
         }
         return PutBoard;
     }
+
     //存的格式
     public String toString() {
-        return String.format(name+"\n"+gid+"\n" +blackPlayer.toString()+"\n"+blackCnt+"\n"+
-                whitePlayer.toString()+"\n"+whiteCnt+"\n"+ putBoard());
+        return String.format(name + "\n" + gid + "\n" + blackPlayer.toString() + "\n" + blackCnt + "\n" +
+                whitePlayer.toString() + "\n" + whiteCnt + "\n" + putBoard());
 
     }
-    public void saveFile()throws Exception{
-        String fileName="D:\\黑白棋数据\\";
-        String fileName2 = "newFile"+getGid()+".txt";
+
+    public void saveFile() throws Exception {
+        String fileName = "D:\\黑白棋数据\\";
+        String fileName2 = "newFile" + getGid() + ".txt";
         fileName = fileName + fileName2;
-        Game game=new Game(name,whitePlayer,blackPlayer);
-        Files.write(Paths.get(fileName),game.toString().getBytes(StandardCharsets.UTF_8)) ;
+        Game game = new Game(name, whitePlayer, blackPlayer);
+        Files.write(Paths.get(fileName), game.toString().getBytes(StandardCharsets.UTF_8));
     }
-    public void upload (int gid) {
-        String fileName="D:\\黑白棋数据\\"+"newFile"+gid+".txt";
 
+    public void upload(int gid) throws IOException {
+        BufferedReader in = new BufferedReader(new FileReader("D:\\黑白棋数据\\" + "newFile" + gid + ".txt"));
+        String allDate;
+        while ((allDate = in.readLine()) != null) {
+            String []k=allDate.split(" ");
+            this.name=k[0];
+            this.gid=Integer.parseInt(k[1]);
+            this.blackPlayer=new Player(k[2],-1,Integer.parseInt(k[3]));
+            this.blackCnt=Integer.parseInt(k[4]);
+            this.whitePlayer=new Player(k[5],1,Integer.parseInt(k[6]));
+            this.whiteCnt=Integer.parseInt(k[7]);
+            int cnt=8;
+            for(int m=0;m<8;m++){
+                for(int n=0;n<8;n++){
+                    board[m][n]=Integer.parseInt(k[cnt]);
+                    cnt++;
+                }
+            }
+        }
     }
+
+
 
 }
