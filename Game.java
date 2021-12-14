@@ -1,4 +1,4 @@
-package initialization;
+package Logic;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -7,30 +7,33 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 public class Game {
     private int gid;
     private String name;
     private static int gameCnt = 1;
-    private Player whitePlayer;
-    private Player blackPlayer;
-    private ArrayList<Step> stepList = new ArrayList<>();
-    private int[][] board = new int[8][8];
+    private static Player whitePlayer;
+    private static Player blackPlayer;
+    private ArrayList<Step> stepList = new ArrayList<Step>(0);
+    private static int[][] board = new int[8][8];
     //新加的
     private int whiteCnt;
     private int blackCnt;
     private static int blackFigure = -1;//代表黑手
     private static int whiteFigure = 1;//代表白手
     private int currentFigure = -1;//代表当前是黑手还是白手，黑手先下
-    private int[] rowStop = new int[8];//每步完需要初始化
-    private int[] columnStop = new int[8];//每步完需要初始化
+    private int[] key=new int[8];
+    int[] direction1 = new int[]{-1, 1, 0, 0, -1, -1, 1, 1};
+    int[] direction2 = new int[]{0, 0, 1, -1, -1, 1, -1, 1};
     private boolean[][] canPut = new boolean[8][8];//每步完需要初始化
-    private ArrayList <boolean >canPutList = new ArrayList();
-    private ArrayList rowStopList = new ArrayList();
-    private ArrayList columnList = new ArrayList();
-    private ArrayList boardList = new ArrayList();
+    private static ArrayList<boolean[][]> canPutList = new ArrayList<boolean[][]>();
+    private static ArrayList<int[]> rowStopList = new ArrayList<int[]>();
+    private static ArrayList<int[]> columnList = new ArrayList<int[]>();
+    private static ArrayList<int[][]> boardList = new ArrayList<int[][]>();
     private int endMark = 0;
+    private boolean gameOver = false;
 
     public Game(String name, Player whitePlayer, Player blackPlayer) {
         this.name = name;
@@ -38,9 +41,10 @@ public class Game {
         gameCnt++;
         this.blackPlayer = blackPlayer;
         this.whitePlayer = whitePlayer;
-        setBoard(board = new int[8][8]);
-
-
+        setBoard(board);
+        this.key = new int[8];
+        this.canPut = new boolean[8][8];
+        this.canPutList = new ArrayList(0);
     }
 
 
@@ -69,6 +73,10 @@ public class Game {
         return blackPlayer;
     }
 
+    public boolean getGameOver() {
+        return this.gameOver;
+    }
+
     public ArrayList<Step> getStepList() {
         return stepList;
     }//get步数数列
@@ -77,12 +85,8 @@ public class Game {
         return canPutList;
     }
 
-    public ArrayList getColumnList() {
-        return columnList;
-    }
-
-    public ArrayList getRowStopList() {
-        return rowStopList;
+    public int[] getKey() {
+        return key;
     }
 
     public ArrayList getBoardList() {
@@ -90,15 +94,25 @@ public class Game {
     }
 
     public int[][] getBoard() {
-        return this.board;
+        int[][] board = new int[8][8];
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                board[i][j] = this.board[i][j];
+            }
+        }
+        return board;
     }//get棋盘
 
     public void setBoard(int[][] board) {
         for (int m = 0; m < 8; m++) {
             for (int n = 0; n < 8; n++) {
-                this.board[m][n] = board[m][n];
+                this.board[m][n] = 0;
             }
         }
+        this.board[3][3] = 1;
+        this.board[4][4] = 1;
+        this.board[3][4] = -1;
+        this.board[4][3] = -1;
     }//初始化棋盘
 
     public int getBlackCnt() {
@@ -137,12 +151,12 @@ public class Game {
         return this.currentFigure;
     }
 
-    public int[] getColumnStop() {
-        return this.columnStop;
+    public static ArrayList<int[]> getColumnList() {
+        return columnList;
     }
 
-    public int[] getRowStop() {
-        return this.rowStop;
+    public static ArrayList<int[]> getRowStopList() {
+        return rowStopList;
     }
 
     public boolean[][] getCanPut() {
@@ -198,256 +212,73 @@ public class Game {
         }
     }
 
-    //检索某位置向上有无同颜色的子还顺便把相同的子存起来，
-    public boolean checkUpLocation(int figure, int rowIndex, int columnIndex) {//你想下的位置
+    public boolean checkLocation(int figure, int rowIndex, int columnIndex) {
         int a = 0;
-        if (rowIndex >= 2) a++;//判断是否为边界点,必须至少在第三行
-        if (diffChess(figure, rowIndex - 1, columnIndex)) a++;//判断该子上方一个是否有对手子
-        for (int x = 2; rowIndex - x >= 0; x++) {
-            int i = rowIndex - x;
-            if (a != 2) {
-                return false;
-            } else if (sameChess(figure, i, columnIndex)) {
-                rowStop[0] = i;
-                return true;
-            } else if (isBoardVoid(i, columnIndex)) {
-                return false;
+        for (int direction = 0; direction < 8; direction++) {
+            //先判断第一个
+            boolean b=false;
+            int p = rowIndex + direction1[direction];
+            int q = columnIndex + direction2[direction];
+            if(p < 0 || p >= 8 || q < 0 || q >= 8 )
+                continue;
+            if (board[p][q] == -figure) {
+                b = true;
+                System.out.printf("%d, %d\n",p, q);
+                System.out.printf("%d first is oppsite\n", direction);
             }
-        }
-        return false;
-    }
-
-    public boolean checkDoLocation(int figure, int rowIndex, int columnIndex) {//你想下的位置
-        int a = 0;
-        if (rowIndex <= 5) a++;//判断是否为边界点,必须至少在第三行
-        if (diffChess(figure, rowIndex + 1, columnIndex)) a++;//判断该子下方一个是否有对手子
-        for (int x = 2; rowIndex + x <= 7; x++) {
-            int i = rowIndex + x;
-            if (a != 2) {
-                return false;
-            } else if (sameChess(figure, i, columnIndex)) {
-                rowStop[1] = i;
-                return true;
-            } else if (isBoardVoid(i, columnIndex)) {
-                return false;
+            c:if (b == true) {
+               h: for (int k = 2; true; ++k) {
+                    int i = rowIndex + direction1[direction] * k;
+                    int j = columnIndex + direction2[direction] * k;
+                    if (i < 0 || i >= 8 || j < 0 || j >= 8)
+                        break c;
+                    if (board[i][j] == 0)
+                        break c;
+                    if (board[i][j] == figure) {
+                        a++;
+                        key[direction] = k;
+                        break;
+                    }
+                }
             }
+//            System.out.printf("direction是%d ",direction);
         }
-        return false;
-    }
-
-    public boolean checkLeLocation(int figure, int rowIndex, int columnIndex) {//你想下的位置
-        int a = 0;
-        if (columnIndex >= 2) a++;//判断是否为边界点,必须至少在第六行
-        if (diffChess(figure, rowIndex, columnIndex - 1)) a++;//判断该子右方一个是否有对手子
-        for (int x = 2; columnIndex + x >= 0; x++) {
-            int i = columnIndex - x;
-            if (a != 2) {
-                return false;
-            } else if (sameChess(figure, rowIndex, i)) {
-                columnStop[2] = i;
-                return true;
-            } else if (isBoardVoid(rowIndex, i)) {
-                return false;
-            }
-        }
-        return false;
-    }
-
-    public boolean checkRiLocation(int figure, int rowIndex, int columnIndex) {//你想下的位置
-        int a = 0;
-        if (columnIndex <= 5) a++;//判断是否为边界点,必须至少在第六行
-        if (diffChess(figure, rowIndex, columnIndex + 1)) a++;//判断该子右方一个是否有对手子
-        for (int x = 2; columnIndex + x <= 7; x++) {
-            int i = columnIndex + x;
-            if (a != 2) {
-                return false;
-            } else if (sameChess(figure, rowIndex, i)) {
-                columnStop[3] = i;
-                return true;
-            } else if (isBoardVoid(rowIndex, i)) {
-                return false;
-            }
-        }
-        return false;
-    }
-
-    public boolean checkLULocation(int figure, int rowIndex, int columnIndex) {//左上
-        int a = 0;
-        if (rowIndex >= 2 && columnIndex >= 2) a++;//判断是否为边界点,必须至少在第三行
-        if (diffChess(figure, rowIndex - 1, columnIndex - 1)) a++;//判断该子上方一个是否有对手子
-        int haha;
-        if (rowIndex <= columnIndex) {
-            haha = rowIndex;
-        } else {
-            haha = columnIndex;
-        }
-        for (int x = 2; haha - x >= 0; x++) {
-            int m = rowIndex - x;
-            int n = columnIndex - x;
-            if (a != 2) {
-                return false;
-            } else if (sameChess(figure, m, n)) {
-                columnStop[4] = m;
-                rowStop[4] = n;
-                return true;
-            } else if (isBoardVoid(m, n)) {
-                return false;
-            }
-        }
-        return false;
-    }
-
-    public boolean checkLDLocation(int figure, int rowIndex, int columnIndex) {//左下
-        int a = 0;
-        if (rowIndex <= 5 && columnIndex >= 2) a++;//判断是否为边界点,必须至少在第三行
-        if (diffChess(figure, rowIndex + 1, columnIndex - 1)) a++;//判断该子上方一个是否有对手子
-        int haha;
-        if (7 - rowIndex <= columnIndex) {
-            haha = 7 - rowIndex;
-        } else {
-            haha = columnIndex;
-        }
-        for (int x = 2; haha - x >= 0; x++) {
-            int n = columnIndex - x;
-            int m = rowIndex + x;
-            if (a != 2) {
-                return false;
-            } else if (sameChess(figure, m, n)) {
-                columnStop[5] = m;
-                rowStop[5] = n;
-                return true;
-            } else if (isBoardVoid(m, n)) {
-                return false;
-            }
-        }
-        return false;
-    }
-
-    public boolean checkRULocation(int figure, int rowIndex, int columnIndex) {//左下
-        int a = 0;
-        if (rowIndex >= 2 && columnIndex <= 5) a++;//判断是否为边界点,必须至少在第三行
-        if (diffChess(figure, rowIndex - 1, columnIndex + 1)) a++;//判断该子上方一个是否有对手子
-        int haha;
-        if (rowIndex <= 7 - columnIndex) {
-            haha = rowIndex;
-        } else {
-            haha = 7 - columnIndex;
-        }
-        for (int x = 2; haha - x >= 0; x++) {
-            int n = columnIndex + x;
-            int m = rowIndex - x;
-            if (a != 2) {
-                return false;
-            } else if (sameChess(figure, m, n)) {
-                columnStop[6] = m;
-                rowStop[6] = n;
-                return true;
-            } else if (isBoardVoid(m, n)) {
-                return false;
-            }
-        }
-        return false;
-    }
-
-    public boolean checkRDLocation(int figure, int rowIndex, int columnIndex) {//左下
-        int a = 0;
-        if (rowIndex <= 5 && columnIndex <= 5) a++;//判断是否为边界点,必须至少在第三行
-        if (diffChess(figure, rowIndex + 1, columnIndex + 1)) a++;//判断该子上方一个是否有对手子
-        int haha;
-        if (7 - rowIndex <= 7 - columnIndex) {
-            haha = 7 - rowIndex;
-        } else {
-            haha = 7 - columnIndex;
-        }
-        for (int x = 2; haha - x >= 0; x++) {
-            int n = columnIndex + x;
-            int m = rowIndex + x;
-            if (a != 2) {
-                return false;
-            } else if (sameChess(figure, m, n)) {
-                columnStop[7] = m;
-                rowStop[7] = n;
-                return true;
-            } else if (isBoardVoid(m, n)) {
-                return false;
-            }
-        }
-        return false;
-    }
-
-    //八个方向的汇总
-    public boolean checkLocation(int figure, int rowIndex, int columnIndex) {//结合八个方向能不能下,只要有一个能下就下
-        if (checkUpLocation(figure, rowIndex, columnIndex) || checkDoLocation(figure, rowIndex, columnIndex) || checkLeLocation(figure, rowIndex, columnIndex) || checkRiLocation(figure, rowIndex, columnIndex) || checkLULocation(figure, rowIndex, columnIndex) || checkLDLocation(figure, rowIndex, columnIndex) || checkRULocation(figure, rowIndex, columnIndex) || checkRDLocation(figure, rowIndex, columnIndex)) {
+        if (a > 0) {
             return true;
-        } else {
-            return false;
+        }
+        return false;
+    }
+
+    public void changeBoard(int figure,int rowIndex,int columnIndex){
+        for(int i=0;i<8;i++){
+            System.out.print(key[i]);}
+        for(int i=0;i<8;i++){
+            if(key[i]>1){
+                for(int k=0;k<key[i];++k){
+                    board[rowIndex+direction1[i]*k][columnIndex+direction2[i]*k]=figure;
+                }
+            }
+        }
+        for(int i=0;i<8;i++){
+            key[i]=0;
         }
     }
 
-    //某人走某位置会怎么改变棋盘
-    public void changeBoard(int figure, int rowIndex, int columnIndex) {
-        if (checkUpLocation(figure, rowIndex, columnIndex)) {
-            for (int i = rowIndex; i >= rowStop[0]; i--) {
-                board[i][columnIndex] = figure;
-            }
-        }
-        if (checkDoLocation(figure, rowIndex, columnIndex)) {
-            for (int i = rowIndex; i <= rowStop[1]; i++) {
-                board[i][columnIndex] = figure;
-            }
-        }
-        if (checkLeLocation(figure, rowIndex, columnIndex)) {
-            for (int i = columnIndex; i >= columnStop[2]; i--) {
-                board[rowIndex][i] = figure;
-            }
-        }
-        if (checkRiLocation(figure, rowIndex, columnIndex)) {
-            for (int i = columnIndex; i <= columnStop[3]; i++) {
-                board[rowIndex][i] = figure;
-            }
-        }
-        if (checkLULocation(figure, rowIndex, columnIndex)) {
-            for (int n = columnIndex; n >= columnStop[4]; n--) {
-                int m = rowIndex;
-                board[m][n] = figure;
-                m--;
-            }
-        }
-        if (checkLDLocation(figure, rowIndex, columnIndex)) {
-            for (int n = columnIndex; n >= columnStop[5]; n--) {
-                int m = rowIndex;
-                board[m][n] = figure;
-                m++;
-            }
-        }
-        if (checkRULocation(figure, rowIndex, columnIndex)) {
-            for (int n = columnIndex; n <= columnStop[6]; n++) {
-                int m = rowIndex;
-                board[m][n] = figure;
-                m--;
-            }
-        }
-        if (checkRDLocation(figure, rowIndex, columnIndex)) {
-            for (int n = columnIndex; n <= columnStop[7]; n++) {
-                int m = rowIndex;
-                board[m][n] = figure;
-                m++;
-            }
-        }
-    }
 
     //判断该人有无能走的位置//且将能走的位置用数组标记为true
     public boolean checkPut(int figure) {
+        boolean mark = false;
         for (int m = 0; m < 8; m++) {
             for (int n = 0; n < 8; n++) {
                 if (isBoardVoid(m, n)) {
                     if (checkLocation(figure, m, n)) {
                         canPut[m][n] = true;
-                        return true;
+                        mark = true;
                     }
                 }
             }
         }
+        if (mark) return true;
         return false;
     }
 
@@ -455,11 +286,9 @@ public class Game {
     public void putChess(int figure, int rowIndex, int columnIndex) {
         changeBoard(figure, rowIndex, columnIndex);//更新棋盘
         Step step = new Step(figure, rowIndex, columnIndex);
-        stepList.add(step.getSid(), step);//存进去下的这一步
+        stepList.add(step);//存进去下的这一步
         canPutList.add(canPut);
-        rowStopList.add(step.getSid(), rowStop);
-        columnList.add(step.getSid(), columnStop);
-        boardList.add(step.getSid(), board);
+        boardList.add(board);
         //重新初始化canPut数组
         for (int m = 0; m < 8; m++) {
             for (int n = 0; n < 8; n++) {
@@ -468,18 +297,23 @@ public class Game {
         }
     }
 
+
     //关于有无可以落子及之后怎么办
     public void howDo(int figure, int rowIndex, int columnIndex) {
         if (checkPut(figure) && canPut[rowIndex][columnIndex]) {
+            System.out.println(Arrays.deepToString(this.getCanPut()));
             endMark = 0;
             putChess(figure, rowIndex, columnIndex);
-        } else if (!checkPut(figure)) {
+            System.out.println(Arrays.deepToString(this.getBoard()));
+            System.out.println();
+//            System.out.println(Arrays.deepToString(this.getCanPut()));
+        } else if (!checkPut(figure) && !canPut[rowIndex][columnIndex]) {
             endMark++;
             if (endMark == 2) {
                 checkWinner(blackCnt, whiteCnt);
+                gameOver = true;
             }
         }
-        currentFigure = -figure;
     }
 
     //判断胜负
@@ -538,17 +372,19 @@ public class Game {
         BufferedReader in = new BufferedReader(new FileReader("D:\\黑白棋数据\\" + "newFile" + gid + ".txt"));
         String allDate;
         while ((allDate = in.readLine()) != null) {
-            String []k=allDate.split(" ");
-            this.name=k[0];
-            this.gid=Integer.parseInt(k[1]);
-            this.blackPlayer=new Player(k[2],-1,Integer.parseInt(k[3]));
-            this.blackCnt=Integer.parseInt(k[4]);
-            this.whitePlayer=new Player(k[5],1,Integer.parseInt(k[6]));
-            this.whiteCnt=Integer.parseInt(k[7]);
-            int cnt=8;
-            for(int m=0;m<8;m++){
-                for(int n=0;n<8;n++){
-                    board[m][n]=Integer.parseInt(k[cnt]);
+            String[] k = allDate.split(" ");
+            this.name = k[0];
+            this.gid = Integer.parseInt(k[1]);
+            this.blackPlayer = new Player(k[2], -1);
+            //Pid()=Integer.parseInt(k[3]);
+            this.blackCnt = Integer.parseInt(k[4]);
+            this.whitePlayer = new Player(k[5], 1);
+            //pid=k[6];
+            this.whiteCnt = Integer.parseInt(k[7]);
+            int cnt = 8;
+            for (int m = 0; m < 8; m++) {
+                for (int n = 0; n < 8; n++) {
+                    board[m][n] = Integer.parseInt(k[cnt]);
                     cnt++;
                 }
             }
@@ -556,5 +392,10 @@ public class Game {
     }
 
 
-
 }
+
+
+
+
+
+
